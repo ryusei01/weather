@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: weather-django
+    env: python
+    buildCommand: |
+      apt-get update
+      apt-get install -y python3-dev build-essential
+      pip install --upgrade pip
+      pip install -r requirements.txt
+    startCommand: gunicorn weather_project.wsgi:application --bind 0.0.0.0:$PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.0
