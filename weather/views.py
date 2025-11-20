@@ -164,3 +164,6 @@ def weather_graph(request):
             'forty_years_ago': current_year - 40,
         }
     })
+
+def health_check(request):
+    return JsonResponse({'status': 'ok'})

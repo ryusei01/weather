@@ -7,9 +7,10 @@ export default function WeatherGraph() {
   const [graphImage, setGraphImage] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
   useEffect(() => {
-    fetch("http://localhost:8000/weather-graph/")
+    fetch(`${API_URL}/weather-graph/`)
       .then((res) => {
         if (!res.ok) {
           throw new Error("グラフの取得に失敗しました");
