@@ -45,6 +45,8 @@ interface WeatherData {
 export default function Home() {
   const [data, setData] = useState<WeatherData | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [customYears, setCustomYears] = useState<number>(1);
+  const [customYearData, setCustomYearData] = useState<any>(null);
   const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
   useEffect(() => {
@@ -53,6 +55,77 @@ export default function Home() {
       .then((res) => setData(res.data))
       .catch((err) => setError(err.message));
   }, [API_URL]);
+
+  // データ取得後にタイトルを動的に変更
+  useEffect(() => {
+    if (!data) return;
+
+    // URLから検索キーワードを取得
+    const urlParams = new URLSearchParams(window.location.search);
+    const keyword = urlParams.get("q") || document.referrer;
+    const yearsParam = urlParams.get("years");
+
+    const fetchData = async () => {
+      // URLに years パラメータがある場合、そのデータを取得
+      if (yearsParam) {
+        const years = parseInt(yearsParam);
+        if (!isNaN(years)) {
+          setCustomYears(years);
+          try {
+            const res = await axios.get(`${API_URL}/custom-year-weather/${years}/`);
+            setCustomYearData(res.data);
+          } catch (err) {
+            console.error('カスタム年数データ取得エラー:', err);
+          }
+        }
+      }
+
+      // キーワードから年数を抽出
+      const yearMatch = keyword.match(/(\d+)年前/);
+      if (yearMatch) {
+        const years = parseInt(yearMatch[1]);
+        setCustomYears(years);
+        try {
+          const res = await axios.get(`${API_URL}/custom-year-weather/${years}/`);
+          setCustomYearData(res.data);
+        } catch (err) {
+          console.error('カスタム年数データ取得エラー:', err);
+        }
+      }
+    };
+
+    fetchData();
+
+    let pageTitle = "天気比較 - 今日と過去の気温を比較";
+    let description = `今日（${data.today_date}）の天気は${data.today_weather}、最高気温は${data.today_high_temp}°C。`;
+
+    // キーワードから年数を抽出してタイトル変更
+    const yearMatch = keyword.match(/(\d+)年前/);
+    if (yearMatch) {
+      const years = parseInt(yearMatch[1]);
+      pageTitle = `${years}年前の気温 | 天気比較`;
+      description = `${years}年前の東京の気温データを今日と比較。`;
+    }
+
+    // タイトルとdescriptionを動的に更新
+    document.title = pageTitle;
+
+    const metaDescription = document.querySelector('meta[name="description"]');
+    if (metaDescription) {
+      metaDescription.setAttribute("content", description);
+    }
+
+    // OGタグも更新
+    const ogTitle = document.querySelector('meta[property="og:title"]');
+    if (ogTitle) {
+      ogTitle.setAttribute("content", pageTitle);
+    }
+
+    const ogDescription = document.querySelector('meta[property="og:description"]');
+    if (ogDescription) {
+      ogDescription.setAttribute("content", description);
+    }
+  }, [data, API_URL]);
 
   if (error) {
     return (
@@ -110,6 +183,57 @@ export default function Home() {
         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 text-center">
           <p className="text-xs text-gray-400">広告スペース (728x90)</p>
         </div>
+
+        {/* 任意の年数を選択 */}
+        <div className="p-6 bg-white rounded-xl shadow-lg">
+          <h2 className="text-2xl font-bold mb-4">何年前の気温を見る？</h2>
+          <div className="flex items-center gap-4">
+            <input
+              type="number"
+              min="1"
+              max="100"
+              value={customYears}
+              onChange={(e) => setCustomYears(parseInt(e.target.value) || 1)}
+              className="px-4 py-2 border-2 border-blue-300 rounded-lg text-xl w-24 focus:outline-none focus:border-blue-500"
+            />
+            <span className="text-xl font-semibold">年前</span>
+            <button
+              onClick={async () => {
+                try {
+                  const res = await axios.get(`${API_URL}/custom-year-weather/${customYears}/`);
+                  setCustomYearData(res.data);
+                } catch (err) {
+                  console.error('データ取得エラー:', err);
+                }
+              }}
+              className="px-6 py-2 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              検索
+            </button>
+          </div>
+        </div>
+
+        {/* カスタム年数の結果表示 */}
+        {customYearData && (
+          <div className="p-8 bg-gradient-to-r from-green-500 to-teal-600 rounded-2xl shadow-2xl text-white">
+            <div className="text-center">
+              <h1 className="text-4xl font-bold mb-4">{customYearData.years_ago}年前の気温</h1>
+              <p className="text-6xl font-extrabold mb-2">{customYearData.temp}°C</p>
+              <p className="text-2xl mb-4">{customYearData.weather}</p>
+              <p className="text-lg opacity-90">{customYearData.date}</p>
+
+              {data && (
+                <div className="mt-6 pt-6 border-t border-white/30">
+                  <p className="text-sm opacity-80">今日（{data.today_date}）との比較</p>
+                  <p className="text-3xl font-bold mt-2">
+                    {(parseFloat(data.today_high_temp) - parseFloat(customYearData.temp)) > 0 ? "+" : ""}
+                    {(parseFloat(data.today_high_temp) - parseFloat(customYearData.temp)).toFixed(1)}°C
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
 
       {/* ---------- 今日の天気 ---------- */}
       <WeatherCard
