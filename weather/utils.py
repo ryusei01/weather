@@ -210,28 +210,21 @@ def generate_temperature_graph(current_year_temps, ten_year_temps, twenty_year_t
     今年・10年前・20年前・30年前・40年前の '月平均気温' を比較するグラフを生成し
     Base64 PNG として返却する
     """
-    import matplotlib.font_manager as fm
     import platform
+    import os
 
     # 日本語フォントを設定（OS別）
     system = platform.system()
+    font_found = False
 
     if system == 'Windows':
-        # Windows環境の日本語フォント
-        font_candidates = ['MS Gothic', 'Yu Gothic', 'Meiryo', 'BIZ UDGothic']
-        for font in font_candidates:
-            try:
-                plt.rcParams['font.sans-serif'] = [font] + plt.rcParams['font.sans-serif']
-                plt.rcParams['font.family'] = 'sans-serif'
-                logger.info(f"Added font to sans-serif: {font}")
-                break
-            except:
-                continue
+        # Windows環境: 日本語フォントを直接指定
+        plt.rcParams['font.sans-serif'] = ['MS Gothic', 'Yu Gothic', 'Meiryo', 'BIZ UDGothic']
+        plt.rcParams['font.family'] = 'sans-serif'
+        font_found = True
+        logger.info(f"Windows: Set Japanese fonts")
     else:
         # Linux/Mac環境: WenQuanYiフォントを使用
-        import os
-
-        # WenQuanYiフォントのパスを探す
         home = os.path.expanduser('~')
         possible_paths = [
             f'{home}/.fonts/wqy-zenhei.ttc',
@@ -239,43 +232,31 @@ def generate_temperature_graph(current_year_temps, ten_year_temps, twenty_year_t
         ]
 
         font_path = None
-        font_found = False
-
         for path in possible_paths:
             if os.path.exists(path):
                 font_path = path
-                logger.info(f"Found Japanese font at: {path}")
                 break
 
         if font_path:
             try:
-                # フォントファイルを直接指定してMatplotlibに追加
-                from matplotlib import font_manager
-
                 # フォントをMatplotlibに登録
+                from matplotlib import font_manager
                 font_manager.fontManager.addfont(font_path)
                 font_prop = font_manager.FontProperties(fname=font_path)
                 font_name = font_prop.get_name()
 
                 # rcParamsに設定
                 plt.rcParams['font.family'] = font_name
-                plt.rcParams['font.sans-serif'] = [font_name] + plt.rcParams['font.sans-serif']
+                plt.rcParams['font.sans-serif'] = [font_name]
 
-                logger.info(f"Successfully registered and set font to: {font_name} from {font_path}")
+                logger.info(f"Linux: Loaded {font_name} from {font_path}")
                 font_found = True
             except Exception as e:
-                logger.error(f"Failed to load font from {font_path}: {e}")
-                logger.warning("Falling back to English labels")
+                logger.error(f"Font load failed: {e}")
                 font_found = False
         else:
-            logger.warning("Could not find Japanese font files - using English labels")
+            logger.warning("Japanese font not found - using English")
             font_found = False
-
-        # 利用可能なフォントをログ出力
-        available_fonts = {f.name for f in fm.fontManager.ttflist}
-        logger.info(f"System: {system}")
-        logger.info(f"Total available fonts: {len(available_fonts)}")
-        logger.info(f"Japanese font loaded: {font_found}")
 
     plt.rcParams['axes.unicode_minus'] = False
     

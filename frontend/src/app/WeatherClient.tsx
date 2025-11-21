@@ -157,7 +157,7 @@ export default function WeatherClient({ initialData }: WeatherClientProps) {
       "@type": "Dataset",
       name: "東京の気温比較データ",
       description:
-        "今日と過去の気温データの比較。1年前の気温、10年前の気温、1週間前の気温など。",
+        "今日と過去の気温データの比較。1年前の気温、10年前の気温、1週間前の気温、昨日の気温、一昨日の気温など。",
       temporalCoverage: `${data.forty_years_date}/${data.today_date}`,
       spatialCoverage: {
         "@type": "Place",
@@ -476,11 +476,14 @@ export default function WeatherClient({ initialData }: WeatherClientProps) {
           </p>
 
           {/* データ表示エリア */}
-          {customWeekData && customWeekData.week_data && customWeekData.week_data.length > 0 ? (
+          {customWeekData &&
+          customWeekData.week_data &&
+          customWeekData.week_data.length > 0 ? (
             <div>
               <div className="mb-4 p-4 bg-purple-50 rounded-lg border border-purple-200">
                 <p className="text-center font-semibold text-purple-800">
-                  過去 {customWeekData.weeks}週間分（{customWeekData.total_days}日分）のデータ
+                  過去 {customWeekData.weeks}週間分（{customWeekData.total_days}
+                  日分）のデータ
                 </p>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
