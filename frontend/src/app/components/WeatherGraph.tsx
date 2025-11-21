@@ -7,7 +7,7 @@ export default function WeatherGraph() {
   const [graphImage, setGraphImage] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://weather-dzvo.onrender.com";
 
   useEffect(() => {
     fetch(`${API_URL}/weather-graph/`)
@@ -26,7 +26,7 @@ export default function WeatherGraph() {
         setError(err.message);
         setLoading(false);
       });
-  }, []);
+  }, [API_URL]);
 
   if (loading) {
     return (

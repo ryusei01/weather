@@ -44,16 +44,17 @@ interface WeatherData {
 export default function Home() {
   const [data, setData] = useState<WeatherData | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://weather-dzvo.onrender.com";
 
   console.log("API_URL:", API_URL);
+  console.log("process.env.NEXT_PUBLIC_API_URL:", process.env.NEXT_PUBLIC_API_URL);
 
   useEffect(() => {
     axios
       .get(`${API_URL}/weather-data/`)
       .then((res) => setData(res.data))
       .catch((err) => setError(err.message));
-  }, []);
+  }, [API_URL]);
 
   if (error) return <p>Error: {error}</p>;
   if (!data) return <p>Loading...</p>;
