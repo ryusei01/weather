@@ -44,10 +44,11 @@ interface WeatherData {
 export default function Home() {
   const [data, setData] = useState<WeatherData | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
   useEffect(() => {
     axios
-      .get("http://localhost:8000/weather-data/")
+      .get(`${API_URL}/weather-graph/`)
       .then((res) => setData(res.data))
       .catch((err) => setError(err.message));
   }, []);
