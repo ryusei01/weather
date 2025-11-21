@@ -46,9 +46,11 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
+  console.log("API_URL:", API_URL);
+
   useEffect(() => {
     axios
-      .get(`${API_URL}/weather-graph/`)
+      .get(`${API_URL}/weather-data/`)
       .then((res) => setData(res.data))
       .catch((err) => setError(err.message));
   }, []);
