@@ -221,7 +221,7 @@ def generate_temperature_graph(current_year_temps, ten_year_temps, twenty_year_t
         font_candidates = ['MS Gothic', 'Yu Gothic', 'Meiryo', 'BIZ UDGothic']
     else:
         # Linux/Mac環境の日本語フォント
-        font_candidates = ['Noto Sans CJK JP', 'Noto Sans JP', 'IPAGothic', 'Takao']
+        font_candidates = ['MS Gothic','Noto Sans CJK JP', 'Noto Sans JP', 'IPAGothic', 'Takao']
 
     # 利用可能なフォントを探す
     available_fonts = {f.name for f in fm.fontManager.ttflist}
