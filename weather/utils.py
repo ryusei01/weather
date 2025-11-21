@@ -212,64 +212,49 @@ def generate_temperature_graph(current_year_temps, ten_year_temps, twenty_year_t
     """
     import matplotlib.font_manager as fm
     import platform
-    import os
-    import glob
 
     # 日本語フォントを設定（OS別）
     system = platform.system()
-    font_found = False
 
     if system == 'Windows':
         # Windows環境の日本語フォント
         font_candidates = ['MS Gothic', 'Yu Gothic', 'Meiryo', 'BIZ UDGothic']
-        available_fonts = {f.name for f in fm.fontManager.ttflist}
-
         for font in font_candidates:
-            if font in available_fonts:
-                plt.rcParams['font.family'] = font
-                logger.info(f"Using font: {font} (System: {system})")
-                font_found = True
+            try:
+                plt.rcParams['font.sans-serif'] = [font] + plt.rcParams['font.sans-serif']
+                plt.rcParams['font.family'] = 'sans-serif'
+                logger.info(f"Added font to sans-serif: {font}")
                 break
+            except:
+                continue
     else:
-        # Linux/Mac環境: フォントファイルパスを直接指定
-        font_paths = [
-            '/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc',
-            '/usr/share/fonts/truetype/noto/NotoSansCJK-Regular.ttc',
-            '/usr/share/fonts/opentype/noto/NotoSansCJK-Medium.ttc',
-            '/System/Library/Fonts/ヒラギノ角ゴシック W3.ttc',
-            '/usr/share/fonts/truetype/takao-gothic/TakaoPGothic.ttf',
+        # Linux/Mac環境: rcParamsのfont.sans-serifに複数の候補を追加
+        # Noto Sans CJK JPは複数のサブフォント名を持つため、全て試す
+        japanese_fonts = [
+            'Noto Sans CJK JP',
+            'Noto Sans Mono CJK JP',
+            'IPAGothic',
+            'IPAPGothic',
+            'Takao',
+            'TakaoPGothic',
+            'DejaVu Sans'
         ]
 
-        # 実際に存在するフォントファイルを探す
-        for font_path in font_paths:
-            if os.path.exists(font_path):
-                try:
-                    font_prop = fm.FontProperties(fname=font_path)
-                    plt.rcParams['font.family'] = font_prop.get_name()
-                    logger.info(f"Using font file: {font_path} -> {font_prop.get_name()}")
-                    font_found = True
-                    break
-                except Exception as e:
-                    logger.warning(f"Failed to load font {font_path}: {e}")
+        # 既存のフォントリストに日本語フォントを追加
+        plt.rcParams['font.sans-serif'] = japanese_fonts + plt.rcParams['font.sans-serif']
+        plt.rcParams['font.family'] = 'sans-serif'
 
-        # フォントファイルが見つからない場合、glob検索
-        if not font_found:
-            noto_fonts = glob.glob('/usr/share/fonts/**/Noto*CJK*.ttc', recursive=True)
-            logger.info(f"Found Noto CJK fonts via glob: {noto_fonts}")
-            if noto_fonts:
-                try:
-                    font_prop = fm.FontProperties(fname=noto_fonts[0])
-                    plt.rcParams['font.family'] = font_prop.get_name()
-                    logger.info(f"Using font file (glob): {noto_fonts[0]} -> {font_prop.get_name()}")
-                    font_found = True
-                except Exception as e:
-                    logger.warning(f"Failed to load font {noto_fonts[0]}: {e}")
-
-    if not font_found:
-        logger.warning(f"Japanese font not found on {system}")
-        plt.rcParams['font.family'] = 'DejaVu Sans'
+        # 利用可能なフォントをログ出力
+        available_fonts = {f.name for f in fm.fontManager.ttflist}
+        found_japanese = [f for f in japanese_fonts if f in available_fonts]
+        logger.info(f"System: {system}")
+        logger.info(f"Available Japanese fonts: {found_japanese}")
+        logger.info(f"Font sans-serif list: {plt.rcParams['font.sans-serif'][:5]}")
 
     plt.rcParams['axes.unicode_minus'] = False
+
+    # 常に日本語ラベルを使用
+    font_found = True
     
     months = range(1, 13)
     fig = plt.figure(figsize=(12, 6))
