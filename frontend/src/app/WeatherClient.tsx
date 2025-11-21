@@ -97,7 +97,7 @@ export default function WeatherClient({ initialData }: WeatherClientProps) {
 
     fetchData();
 
-    let pageTitle = "天気比較 - 今日と過去の気温を比較";
+    let pageTitle = "1年前の気温は？ - 今日と過去の気温を比較";
     let description = `今日（${data.today_date}）の天気は${data.today_weather}、最高気温は${data.today_high_temp}°C。`;
 
     // キーワードから年数を抽出してタイトル変更
@@ -158,6 +158,10 @@ export default function WeatherClient({ initialData }: WeatherClientProps) {
         {/* 広告スペース (上部) */}
         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 text-center">
           <p className="text-xs text-gray-400">広告スペース (728x90)</p>
+        </div>
+
+        <div>
+          <h1 className="text-2xl font-bold mb-4">東京の過去の気温と天気 </h1>
         </div>
 
         {/* 任意の年数を選択 */}
@@ -491,13 +495,7 @@ interface CardProps {
   source: string;
 }
 
-function WeatherCard({
-  title,
-  temp,
-  tempHigh,
-  weather,
-  source,
-}: CardProps) {
+function WeatherCard({ title, temp, tempHigh, weather, source }: CardProps) {
   return (
     <div className="p-6 bg-white rounded-xl shadow">
       <h2 className="text-2xl font-bold mb-3">{title}</h2>

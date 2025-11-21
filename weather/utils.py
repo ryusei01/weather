@@ -221,21 +221,26 @@ def generate_temperature_graph(current_year_temps, ten_year_temps, twenty_year_t
         font_candidates = ['MS Gothic', 'Yu Gothic', 'Meiryo', 'BIZ UDGothic']
     else:
         # Linux/Mac環境の日本語フォント
-        font_candidates = ['MS Gothic','Noto Sans CJK JP', 'Noto Sans JP', 'IPAGothic', 'Takao']
+        font_candidates = ['Noto Sans CJK JP', 'Noto Sans JP', 'IPAGothic', 'Takao', 'DejaVu Sans']
 
     # 利用可能なフォントを探す
     available_fonts = {f.name for f in fm.fontManager.ttflist}
+
+    # デバッグ: 利用可能なフォントをログ出力
+    logger.info(f"System: {system}")
+    logger.info(f"Available fonts containing 'Noto' or 'CJK': {[f for f in available_fonts if 'Noto' in f or 'CJK' in f or 'IPA' in f]}")
 
     font_found = False
     for font in font_candidates:
         if font in available_fonts:
             plt.rcParams['font.family'] = font
-            print(f"Using font: {font} (System: {system})")
+            logger.info(f"Using font: {font} (System: {system})")
             font_found = True
             break
 
     if not font_found:
-        print(f"Japanese font not found on {system}, using DejaVu Sans")
+        logger.warning(f"Japanese font not found on {system}. Tried: {font_candidates}")
+        logger.warning(f"Available fonts sample: {list(available_fonts)[:10]}")
         plt.rcParams['font.family'] = 'DejaVu Sans'
 
     plt.rcParams['axes.unicode_minus'] = False
