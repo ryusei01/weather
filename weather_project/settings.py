@@ -29,6 +29,7 @@ ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',
     '.render.com',  # Renderのドメイン
+    'weather-dzvo.onrender.com',  # 明示的に追加
 ]
 
 
