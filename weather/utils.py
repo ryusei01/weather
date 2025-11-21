@@ -229,12 +229,14 @@ def generate_temperature_graph(current_year_temps, ten_year_temps, twenty_year_t
                 continue
     else:
         # Linux/Mac環境: rcParamsのfont.sans-serifに複数の候補を追加
-        # Noto Sans CJK JPは複数のサブフォント名を持つため、全て試す
+        # IPAフォントを最優先、次にNoto CJK
         japanese_fonts = [
-            'Noto Sans CJK JP',
-            'Noto Sans Mono CJK JP',
             'IPAGothic',
             'IPAPGothic',
+            'IPAMincho',
+            'IPAPMincho',
+            'Noto Sans CJK JP',
+            'Noto Sans Mono CJK JP',
             'Takao',
             'TakaoPGothic',
             'DejaVu Sans'
@@ -250,6 +252,10 @@ def generate_temperature_graph(current_year_temps, ten_year_temps, twenty_year_t
         logger.info(f"System: {system}")
         logger.info(f"Available Japanese fonts: {found_japanese}")
         logger.info(f"Font sans-serif list: {plt.rcParams['font.sans-serif'][:5]}")
+
+        # 全フォントリストをログ出力（デバッグ用）
+        all_fonts = sorted([f.name for f in fm.fontManager.ttflist if 'IPA' in f.name or 'ipa' in f.name])
+        logger.info(f"All IPA fonts found: {all_fonts}")
 
     plt.rcParams['axes.unicode_minus'] = False
 
