@@ -151,12 +151,13 @@ export default function WeatherClient({ initialData }: WeatherClientProps) {
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "WebPage",
-    name: "天気比較 - 今日と過去の気温を比較",
+    name: "1年前の気温は？ - 今日と過去の気温を比較",
     description: `今日（${data.today_date}）の天気は${data.today_weather}、最高気温は${data.today_high_temp}°C。1年前（${data.last_year_date}）は${data.last_year_temp}°C、10年前（${data.ten_years_date}）は${data.ten_years_temp}°Cでした。`,
     mainEntity: {
       "@type": "Dataset",
       name: "東京の気温比較データ",
-      description: "今日と過去の気温データの比較",
+      description:
+        "今日と過去の気温データの比較。1年前の気温、10年前の気温、1週間前の気温など。",
       temporalCoverage: `${data.forty_years_date}/${data.today_date}`,
       spatialCoverage: {
         "@type": "Place",
@@ -426,48 +427,12 @@ export default function WeatherClient({ initialData }: WeatherClientProps) {
           source={data.forty_years_source}
         />
 
-        {/* ---------- 7日間の気温 ---------- */}
-        {data.week_data && data.week_data.length > 0 && (
-          <div className="p-6 bg-white rounded-xl shadow-lg">
-            <h2 className="text-2xl font-bold mb-4">📅 過去7日間の気温 ({data.week_data.length}件)</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {data.week_data.map((day) => (
-                <div
-                  key={day.days_ago}
-                  className="p-4 bg-gradient-to-br from-blue-50 to-purple-50 rounded-lg border border-blue-200"
-                >
-                  <div className="flex justify-between items-start mb-2">
-                    <span className="text-sm font-semibold text-blue-600">
-                      {day.days_ago}日前
-                    </span>
-                    <span className="text-xs text-gray-500">{day.date}</span>
-                  </div>
-                  <div className="flex items-baseline gap-2 mb-1">
-                    <span className="text-3xl font-bold text-gray-800">
-                      {day.temp || "---"}
-                    </span>
-                    <span className="text-lg text-gray-600">°C</span>
-                  </div>
-                  <p className="text-sm text-gray-700 mb-2">{day.weather || "データなし"}</p>
-                  <a
-                    href={day.source}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-xs text-blue-600 hover:text-blue-800 hover:underline"
-                  >
-                    詳細を見る →
-                  </a>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* 週数検索セクション */}
+        {/* ---------- 週間気温表示（統合版） ---------- */}
         <div className="p-6 bg-white rounded-xl shadow-lg">
-          <h2 className="text-2xl font-bold mb-4">📅 何週間前の気温を見る？</h2>
-          <div className="flex items-center gap-4 flex-wrap">
+          <h2 className="text-2xl font-bold mb-4">📅 過去の週間気温</h2>
+          <div className="flex items-center gap-4 flex-wrap mb-6">
             <div className="flex items-center gap-2">
+              <span className="text-sm font-semibold text-gray-700">過去</span>
               <input
                 type="number"
                 min="1"
@@ -476,7 +441,7 @@ export default function WeatherClient({ initialData }: WeatherClientProps) {
                 onChange={(e) => setCustomWeeks(parseInt(e.target.value) || 1)}
                 className="px-4 py-2 border-2 border-purple-300 rounded-lg text-xl w-24 focus:outline-none focus:border-purple-500"
               />
-              <span className="text-xl font-semibold">週間前</span>
+              <span className="text-xl font-semibold">週間分</span>
             </div>
             <button
               onClick={async () => {
@@ -499,77 +464,100 @@ export default function WeatherClient({ initialData }: WeatherClientProps) {
               >
                 <path
                   fillRule="evenodd"
-                  d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
+                  d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z"
                   clipRule="evenodd"
                 />
               </svg>
-              検索
+              表示
             </button>
           </div>
-          <p className="text-sm text-gray-500 mt-3">
-            💡 1〜52週間前（約1年分）の気温を検索できます
+          <p className="text-sm text-gray-500 mb-4">
+            💡 1〜52週間前（最大364日分）の気温を表示できます
           </p>
+
+          {/* データ表示エリア */}
+          {customWeekData && customWeekData.week_data && customWeekData.week_data.length > 0 ? (
+            <div>
+              <div className="mb-4 p-4 bg-purple-50 rounded-lg border border-purple-200">
+                <p className="text-center font-semibold text-purple-800">
+                  過去 {customWeekData.weeks}週間分（{customWeekData.total_days}日分）のデータ
+                </p>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {customWeekData.week_data.map((day: any) => (
+                  <div
+                    key={day.days_ago}
+                    className="p-4 bg-gradient-to-br from-blue-50 to-purple-50 rounded-lg border border-blue-200 hover:shadow-md transition-shadow"
+                  >
+                    <div className="flex justify-between items-start mb-2">
+                      <span className="text-sm font-semibold text-blue-600">
+                        {day.days_ago}日前
+                      </span>
+                      <span className="text-xs text-gray-500">{day.date}</span>
+                    </div>
+                    <div className="flex items-baseline gap-2 mb-1">
+                      <span className="text-3xl font-bold text-gray-800">
+                        {day.temp || "---"}
+                      </span>
+                      <span className="text-lg text-gray-600">°C</span>
+                    </div>
+                    <p className="text-sm text-gray-700 mb-2">
+                      {day.weather || "データなし"}
+                    </p>
+                    <a
+                      href={day.source}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs text-blue-600 hover:text-blue-800 hover:underline"
+                    >
+                      詳細を見る →
+                    </a>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : data.week_data && data.week_data.length > 0 ? (
+            <div>
+              <div className="mb-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                <p className="text-center font-semibold text-blue-800">
+                  過去 1週間分（7日分）のデータ（デフォルト表示）
+                </p>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {data.week_data.map((day) => (
+                  <div
+                    key={day.days_ago}
+                    className="p-4 bg-gradient-to-br from-blue-50 to-purple-50 rounded-lg border border-blue-200 hover:shadow-md transition-shadow"
+                  >
+                    <div className="flex justify-between items-start mb-2">
+                      <span className="text-sm font-semibold text-blue-600">
+                        {day.days_ago}日前
+                      </span>
+                      <span className="text-xs text-gray-500">{day.date}</span>
+                    </div>
+                    <div className="flex items-baseline gap-2 mb-1">
+                      <span className="text-3xl font-bold text-gray-800">
+                        {day.temp || "---"}
+                      </span>
+                      <span className="text-lg text-gray-600">°C</span>
+                    </div>
+                    <p className="text-sm text-gray-700 mb-2">
+                      {day.weather || "データなし"}
+                    </p>
+                    <a
+                      href={day.source}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs text-blue-600 hover:text-blue-800 hover:underline"
+                    >
+                      詳細を見る →
+                    </a>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : null}
         </div>
-
-        {/* 週数検索の結果表示 */}
-        {customWeekData && (
-          <div className="p-8 bg-gradient-to-r from-purple-500 to-pink-600 rounded-2xl shadow-2xl text-white relative overflow-hidden">
-            <div className="absolute top-0 right-0 opacity-10">
-              <svg
-                className="w-64 h-64"
-                viewBox="0 0 24 24"
-                fill="currentColor"
-              >
-                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z" />
-              </svg>
-            </div>
-
-            <div className="text-center relative z-10">
-              <div className="flex items-center justify-center gap-3 mb-4">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-10 w-10"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-                <h3 className="text-3xl font-bold">
-                  {customWeekData.weeks_ago}週間前（{customWeekData.weeks_ago * 7}日前）の気温
-                </h3>
-              </div>
-
-              <div className="bg-white/20 backdrop-blur-sm rounded-xl p-6 mb-4">
-                <p className="text-lg mb-2">{customWeekData.date}</p>
-                <div className="flex items-center justify-center gap-4">
-                  <div>
-                    <p className="text-6xl font-bold">
-                      {customWeekData.temp || "---"}°C
-                    </p>
-                  </div>
-                  <div className="text-left">
-                    <p className="text-2xl font-semibold">
-                      {customWeekData.weather || "データなし"}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <a
-                href={customWeekData.source}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-block bg-white text-purple-600 px-6 py-3 rounded-lg font-bold hover:bg-purple-50 transition-colors"
-              >
-                気象庁のデータを見る →
-              </a>
-            </div>
-          </div>
-        )}
 
         {/* ---------- 月の最高気温 ---------- */}
         <div className="p-6 bg-white rounded-xl shadow">

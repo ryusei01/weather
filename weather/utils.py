@@ -228,39 +228,56 @@ def generate_temperature_graph(current_year_temps, ten_year_temps, twenty_year_t
             except:
                 continue
     else:
-        # Linux/Mac環境: rcParamsのfont.sans-serifに複数の候補を追加
-        # IPAフォントを最優先、次にNoto CJK
-        japanese_fonts = [
-            'IPAGothic',
-            'IPAPGothic',
-            'IPAMincho',
-            'IPAPMincho',
-            'Noto Sans CJK JP',
-            'Noto Sans Mono CJK JP',
-            'Takao',
-            'TakaoPGothic',
-            'DejaVu Sans'
+        # Linux/Mac環境: WenQuanYiフォントを使用
+        import os
+
+        # WenQuanYiフォントのパスを探す
+        home = os.path.expanduser('~')
+        possible_paths = [
+            f'{home}/.fonts/wqy-zenhei.ttc',
+            f'{home}/.fonts/wqy-microhei.ttc',
         ]
 
-        # 既存のフォントリストに日本語フォントを追加
-        plt.rcParams['font.sans-serif'] = japanese_fonts + plt.rcParams['font.sans-serif']
-        plt.rcParams['font.family'] = 'sans-serif'
+        font_path = None
+        font_found = False
+
+        for path in possible_paths:
+            if os.path.exists(path):
+                font_path = path
+                logger.info(f"Found Japanese font at: {path}")
+                break
+
+        if font_path:
+            try:
+                # フォントファイルを直接指定してMatplotlibに追加
+                from matplotlib import font_manager
+
+                # フォントをMatplotlibに登録
+                font_manager.fontManager.addfont(font_path)
+                font_prop = font_manager.FontProperties(fname=font_path)
+                font_name = font_prop.get_name()
+
+                # rcParamsに設定
+                plt.rcParams['font.family'] = font_name
+                plt.rcParams['font.sans-serif'] = [font_name] + plt.rcParams['font.sans-serif']
+
+                logger.info(f"Successfully registered and set font to: {font_name} from {font_path}")
+                font_found = True
+            except Exception as e:
+                logger.error(f"Failed to load font from {font_path}: {e}")
+                logger.warning("Falling back to English labels")
+                font_found = False
+        else:
+            logger.warning("Could not find Japanese font files - using English labels")
+            font_found = False
 
         # 利用可能なフォントをログ出力
         available_fonts = {f.name for f in fm.fontManager.ttflist}
-        found_japanese = [f for f in japanese_fonts if f in available_fonts]
         logger.info(f"System: {system}")
-        logger.info(f"Available Japanese fonts: {found_japanese}")
-        logger.info(f"Font sans-serif list: {plt.rcParams['font.sans-serif'][:5]}")
-
-        # 全フォントリストをログ出力（デバッグ用）
-        all_fonts = sorted([f.name for f in fm.fontManager.ttflist if 'IPA' in f.name or 'ipa' in f.name])
-        logger.info(f"All IPA fonts found: {all_fonts}")
+        logger.info(f"Total available fonts: {len(available_fonts)}")
+        logger.info(f"Japanese font loaded: {font_found}")
 
     plt.rcParams['axes.unicode_minus'] = False
-
-    # 常に日本語ラベルを使用
-    font_found = True
     
     months = range(1, 13)
     fig = plt.figure(figsize=(12, 6))

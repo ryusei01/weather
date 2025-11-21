@@ -211,26 +211,35 @@ def health_check(request):
 @csrf_exempt
 def custom_week_weather(request, weeks):
     """
-    指定された週数前の天気データを返す
-    例: /custom-week-weather/1/ → 1週間前（7日前）のデータ
+    指定された週数分の日次データを返す
+    例: /custom-week-weather/1/ → 過去1週間分（7日分）のデータ
+        /custom-week-weather/2/ → 過去2週間分（14日分）のデータ
     """
     try:
         weeks = int(weeks)
-        if weeks < 0 or weeks > 52:
-            return JsonResponse({'error': '週数は0〜52の範囲で指定してください'}, status=400)
+        if weeks < 1 or weeks > 52:
+            return JsonResponse({'error': '週数は1〜52の範囲で指定してください'}, status=400)
 
         today = datetime.now()
-        target_date = today - timedelta(weeks=weeks)
+        total_days = weeks * 7
 
-        # 過去のデータを取得
-        past_info = get_past_weather_data(target_date)
+        # N週間分の日次データを取得
+        week_data = []
+        for days_ago in range(total_days, 0, -1):
+            target_date = today - timedelta(days=days_ago)
+            day_info = get_past_weather_data(target_date)
+            week_data.append({
+                'days_ago': days_ago,
+                'date': day_info['date'],
+                'temp': day_info['temp'],
+                'weather': day_info['weather'],
+                'source': day_info['source']
+            })
 
         return JsonResponse({
-            'weeks_ago': weeks,
-            'date': past_info['date'],
-            'temp': past_info['temp'],
-            'weather': past_info['weather'],
-            'source': past_info['source'],
+            'weeks': weeks,
+            'total_days': total_days,
+            'week_data': week_data,
             'today_date': today.strftime("%Y-%m-%d"),
         })
     except Exception as e:
