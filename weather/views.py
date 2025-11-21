@@ -78,6 +78,19 @@ def weather_data(request):
     thirty_years_info = get_past_weather_data(today.replace(year=today.year - 30))
     forty_years_info = get_past_weather_data(today.replace(year=today.year - 40))
 
+    # 7日間分のデータ（1週間前から7日前まで）
+    week_data = []
+    for days_ago in range(7, 0, -1):  # 7日前から1日前まで
+        target_date = today - timedelta(days=days_ago)
+        day_info = get_past_weather_data(target_date)
+        week_data.append({
+            'days_ago': days_ago,
+            'date': day_info['date'],
+            'temp': day_info['temp'],
+            'weather': day_info['weather'],
+            'source': day_info['source']
+        })
+
     # 類似天気（去年基準）
     similar_weather_data = get_similar_weather_data(
         last_year.year,
@@ -131,6 +144,9 @@ def weather_data(request):
         # 追加情報
         "similar_weather_data": similar_weather_data,
         "highest_temp": highest_temp,
+
+        # 7日間のデータ
+        "week_data": week_data,
     })
 
 @csrf_exempt
