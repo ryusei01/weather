@@ -316,3 +316,104 @@ def generate_temperature_graph(current_year_temps, ten_year_temps, twenty_year_t
     buffer.seek(0)
 
     return base64.b64encode(buffer.read()).decode('utf-8')
+
+
+def predict_temperature_trend():
+    """
+    過去10年のデータから今月・来月・再来月の気温トレンドを予測
+    Returns: dict with predictions for current, next, and next-next month
+    """
+    from sklearn.linear_model import LinearRegression
+    import numpy as np
+    from datetime import datetime
+    from dateutil.relativedelta import relativedelta
+
+    try:
+        today = datetime.now()
+        current_month = today.month
+        current_year = today.year
+
+        # 過去10年分のデータを収集（各月）
+        predictions = []
+
+        for month_offset in [0, 1, 2]:  # 今月、来月、再来月
+            target_date = today + relativedelta(months=month_offset)
+            target_month = target_date.month
+            target_year = target_date.year
+
+            # 過去10年のこの月のデータを取得
+            temps = []
+            years = []
+
+            for year_back in range(1, 11):  # 過去10年
+                past_year = current_year - year_back
+                try:
+                    avg_temp = get_average_temperature(past_year, target_month)
+                    if avg_temp is not None:
+                        temps.append(avg_temp)
+                        years.append(past_year)
+                except:
+                    continue
+
+            if len(temps) >= 3:  # 最低3年分のデータがあれば予測
+                # 線形回帰モデルで予測
+                X = np.array(years).reshape(-1, 1)
+                y = np.array(temps)
+
+                model = LinearRegression()
+                model.fit(X, y)
+
+                # 今年の予測
+                predicted_temp = model.predict([[target_year]])[0]
+
+                # 過去10年の平均
+                avg_past_temp = np.mean(temps)
+
+                # トレンド判定
+                temp_diff = predicted_temp - avg_past_temp
+                if temp_diff > 1.0:
+                    trend = "暑くなる"
+                    trend_en = "hotter"
+                elif temp_diff < -1.0:
+                    trend = "寒くなる"
+                    trend_en = "colder"
+                else:
+                    trend = "平年並み"
+                    trend_en = "average"
+
+                predictions.append({
+                    'month': target_month,
+                    'year': target_year,
+                    'predicted_temp': round(predicted_temp, 1),
+                    'past_avg_temp': round(avg_past_temp, 1),
+                    'temp_diff': round(temp_diff, 1),
+                    'trend': trend,
+                    'trend_en': trend_en,
+                    'confidence': min(len(temps) * 10, 100)  # データ数に応じた信頼度
+                })
+            else:
+                predictions.append({
+                    'month': target_month,
+                    'year': target_year,
+                    'predicted_temp': None,
+                    'past_avg_temp': None,
+                    'temp_diff': None,
+                    'trend': 'データ不足',
+                    'trend_en': 'insufficient_data',
+                    'confidence': 0
+                })
+
+        return {
+            'success': True,
+            'current_month': predictions[0],
+            'next_month': predictions[1],
+            'next_next_month': predictions[2],
+            'data_source': '過去10年の気象庁データ'
+        }
+
+    except Exception as e:
+        logger.error(f"Temperature prediction error: {e}")
+        return {
+            'success': False,
+            'error': str(e)
+        }

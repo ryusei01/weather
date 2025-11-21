@@ -272,3 +272,21 @@ def custom_year_weather(request, years):
         })
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
+
+@csrf_exempt
+def predict_weather(request):
+    """
+    AI予測: 今月・来月・再来月の気温トレンドを予測
+    過去10年のデータから線形回帰モデルで予測
+    """
+    try:
+        from .utils import predict_temperature_trend
+
+        prediction_data = predict_temperature_trend()
+
+        return JsonResponse(prediction_data)
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        }, status=500)

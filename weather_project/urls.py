@@ -9,5 +9,6 @@ urlpatterns = [
     path('weather-graph/', views.weather_graph, name='weather_graph'),
     path('custom-week-weather/<int:weeks>/', views.custom_week_weather, name='custom_week_weather'),
     path('custom-year-weather/<int:years>/', views.custom_year_weather, name='custom_year_weather'),
+    path('predict-weather/', views.predict_weather, name='predict_weather'),
     path('health/', views.health_check, name='health_check'),
 ]

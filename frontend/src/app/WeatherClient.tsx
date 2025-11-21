@@ -60,6 +60,8 @@ export default function WeatherClient({ initialData }: WeatherClientProps) {
   const [customYearData, setCustomYearData] = useState<any>(null);
   const [customWeeks, setCustomWeeks] = useState<number>(1);
   const [customWeekData, setCustomWeekData] = useState<any>(null);
+  const [prediction, setPrediction] = useState<any>(null);
+  const [predictionLoading, setPredictionLoading] = useState<boolean>(false);
   const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
   // データ取得後にタイトルを動的に変更
@@ -78,6 +80,17 @@ export default function WeatherClient({ initialData }: WeatherClientProps) {
         setCustomYearData(res.data);
       } catch (err) {
         console.error("1年前データ取得エラー:", err);
+      }
+
+      // AI予測を自動取得
+      try {
+        setPredictionLoading(true);
+        const predRes = await axios.get(`${API_URL}/predict-weather/`);
+        setPrediction(predRes.data);
+      } catch (err) {
+        console.error("AI予測取得エラー:", err);
+      } finally {
+        setPredictionLoading(false);
       }
 
       // URLに years パラメータがある場合、そのデータを取得
@@ -561,6 +574,141 @@ export default function WeatherClient({ initialData }: WeatherClientProps) {
             </div>
           ) : null}
         </div>
+
+        {/* ---------- AI気温予測 ---------- */}
+        <div className="p-6 bg-gradient-to-r from-purple-600 to-pink-600 rounded-xl shadow-lg text-white">
+          <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
+            <span>🤖</span>
+            <span>AI気温予測</span>
+          </h2>
+          <p className="text-sm mb-4 opacity-90">
+            過去10年のデータから機械学習で予測しています
+          </p>
+          <button
+            onClick={async () => {
+              setPredictionLoading(true);
+              try {
+                const res = await axios.get(`${API_URL}/predict-weather/`);
+                setPrediction(res.data);
+              } catch (err) {
+                console.error("予測エラー:", err);
+              } finally {
+                setPredictionLoading(false);
+              }
+            }}
+            disabled={predictionLoading}
+            className="px-6 py-3 bg-white text-purple-600 font-bold rounded-lg hover:bg-purple-50 transition-colors shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {predictionLoading ? "予測中..." : "気温トレンドを予測"}
+          </button>
+        </div>
+
+        {/* AI予測結果 */}
+        {prediction && prediction.success && (
+          <div className="p-6 bg-white rounded-xl shadow-lg">
+            <h3 className="text-xl font-bold mb-4">📊 予測結果</h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* 今月 */}
+              {prediction.current_month && (
+                <div className="p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg border border-blue-200">
+                  <h4 className="text-lg font-bold mb-2">
+                    今月 ({prediction.current_month.month}月)
+                  </h4>
+                  <div className="space-y-2">
+                    <p className="text-3xl font-bold text-blue-600">
+                      {prediction.current_month.trend}
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      予測: {prediction.current_month.predicted_temp}°C
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      過去平均: {prediction.current_month.past_avg_temp}°C
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      差: {prediction.current_month.temp_diff > 0 ? "+" : ""}
+                      {prediction.current_month.temp_diff}°C
+                    </p>
+                    <div className="mt-2 bg-blue-200 rounded-full h-2">
+                      <div
+                        className="bg-blue-600 h-2 rounded-full"
+                        style={{
+                          width: `${prediction.current_month.confidence}%`,
+                        }}
+                      ></div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* 来月 */}
+              {prediction.next_month && (
+                <div className="p-4 bg-gradient-to-br from-green-50 to-green-100 rounded-lg border border-green-200">
+                  <h4 className="text-lg font-bold mb-2">
+                    来月 ({prediction.next_month.month}月)
+                  </h4>
+                  <div className="space-y-2">
+                    <p className="text-3xl font-bold text-green-600">
+                      {prediction.next_month.trend}
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      予測: {prediction.next_month.predicted_temp}°C
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      過去平均: {prediction.next_month.past_avg_temp}°C
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      差: {prediction.next_month.temp_diff > 0 ? "+" : ""}
+                      {prediction.next_month.temp_diff}°C
+                    </p>
+                    <div className="mt-2 bg-green-200 rounded-full h-2">
+                      <div
+                        className="bg-green-600 h-2 rounded-full"
+                        style={{
+                          width: `${prediction.next_month.confidence}%`,
+                        }}
+                      ></div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* 再来月 */}
+              {prediction.next_next_month && (
+                <div className="p-4 bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg border border-orange-200">
+                  <h4 className="text-lg font-bold mb-2">
+                    再来月 ({prediction.next_next_month.month}月)
+                  </h4>
+                  <div className="space-y-2">
+                    <p className="text-3xl font-bold text-orange-600">
+                      {prediction.next_next_month.trend}
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      予測: {prediction.next_next_month.predicted_temp}°C
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      過去平均: {prediction.next_next_month.past_avg_temp}°C
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      差: {prediction.next_next_month.temp_diff > 0 ? "+" : ""}
+                      {prediction.next_next_month.temp_diff}°C
+                    </p>
+                    <div className="mt-2 bg-orange-200 rounded-full h-2">
+                      <div
+                        className="bg-orange-600 h-2 rounded-full"
+                        style={{
+                          width: `${prediction.next_next_month.confidence}%`,
+                        }}
+                      ></div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+            <p className="text-xs text-gray-500 mt-4">
+              データソース: {prediction.data_source}
+            </p>
+          </div>
+        )}
 
         {/* ---------- 月の最高気温 ---------- */}
         <div className="p-6 bg-white rounded-xl shadow">
