@@ -51,6 +51,8 @@ export default function WeatherClient({ initialData }: WeatherClientProps) {
   const [data, setData] = useState<WeatherData>(initialData);
   const [customYears, setCustomYears] = useState<number>(1);
   const [customYearData, setCustomYearData] = useState<any>(null);
+  const [customWeeks, setCustomWeeks] = useState<number>(1);
+  const [customWeekData, setCustomWeekData] = useState<any>(null);
   const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
   // データ取得後にタイトルを動的に変更
@@ -63,6 +65,14 @@ export default function WeatherClient({ initialData }: WeatherClientProps) {
     const yearsParam = urlParams.get("years");
 
     const fetchData = async () => {
+      // デフォルトで1週間前のデータを取得
+      try {
+        const res = await axios.get(`${API_URL}/custom-week-weather/1/`);
+        setCustomWeekData(res.data);
+      } catch (err) {
+        console.error("1週間前データ取得エラー:", err);
+      }
+
       // URLに years パラメータがある場合、そのデータを取得
       if (yearsParam) {
         const years = parseInt(yearsParam);
@@ -163,6 +173,114 @@ export default function WeatherClient({ initialData }: WeatherClientProps) {
         <div>
           <h1 className="text-2xl font-bold mb-4">東京の過去の気温と天気 </h1>
         </div>
+
+        {/* 週数検索セクション */}
+        <div className="p-6 bg-white rounded-xl shadow-lg">
+          <h2 className="text-2xl font-bold mb-4">📅 何週間前の気温を見る？</h2>
+          <div className="flex items-center gap-4 flex-wrap">
+            <div className="flex items-center gap-2">
+              <input
+                type="number"
+                min="1"
+                max="52"
+                value={customWeeks}
+                onChange={(e) => setCustomWeeks(parseInt(e.target.value) || 1)}
+                className="px-4 py-2 border-2 border-purple-300 rounded-lg text-xl w-24 focus:outline-none focus:border-purple-500"
+              />
+              <span className="text-xl font-semibold">週間前</span>
+            </div>
+            <button
+              onClick={async () => {
+                try {
+                  const res = await axios.get(
+                    `${API_URL}/custom-week-weather/${customWeeks}/`
+                  );
+                  setCustomWeekData(res.data);
+                } catch (err) {
+                  console.error("データ取得エラー:", err);
+                }
+              }}
+              className="flex items-center gap-2 px-6 py-2 bg-purple-600 text-white font-bold rounded-lg hover:bg-purple-700 transition-colors shadow-md hover:shadow-lg"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
+                  clipRule="evenodd"
+                />
+              </svg>
+              検索
+            </button>
+          </div>
+          <p className="text-sm text-gray-500 mt-3">
+            💡 1〜52週間前（約1年分）の気温を検索できます
+          </p>
+        </div>
+
+        {/* 週数検索の結果表示 */}
+        {customWeekData && (
+          <div className="p-8 bg-gradient-to-r from-purple-500 to-pink-600 rounded-2xl shadow-2xl text-white relative overflow-hidden">
+            <div className="absolute top-0 right-0 opacity-10">
+              <svg
+                className="w-64 h-64"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+              >
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z" />
+              </svg>
+            </div>
+
+            <div className="text-center relative z-10">
+              <div className="flex items-center justify-center gap-3 mb-4">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-10 w-10"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+                <h3 className="text-3xl font-bold">
+                  {customWeekData.weeks_ago}週間前（{customWeekData.weeks_ago * 7}日前）の気温
+                </h3>
+              </div>
+
+              <div className="bg-white/20 backdrop-blur-sm rounded-xl p-6 mb-4">
+                <p className="text-lg mb-2">{customWeekData.date}</p>
+                <div className="flex items-center justify-center gap-4">
+                  <div>
+                    <p className="text-6xl font-bold">
+                      {customWeekData.temp || "---"}°C
+                    </p>
+                  </div>
+                  <div className="text-left">
+                    <p className="text-2xl font-semibold">
+                      {customWeekData.weather || "データなし"}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <a
+                href={customWeekData.source}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-block bg-white text-purple-600 px-6 py-3 rounded-lg font-bold hover:bg-purple-50 transition-colors"
+              >
+                気象庁のデータを見る →
+              </a>
+            </div>
+          </div>
+        )}
 
         {/* 任意の年数を選択 */}
         <div className="p-6 bg-white rounded-xl shadow-lg">
