@@ -211,15 +211,28 @@ def generate_temperature_graph(current_year_temps, ten_year_temps, twenty_year_t
     Base64 PNG として返却する
     """
     import matplotlib.font_manager as fm
-    
-    # 利用可能な日本語フォントを探す
-    japanese_fonts = [f.name for f in fm.fontManager.ttflist if 'Gothic' in f.name or 'Meiryo' in f.name or 'Yu' in f.name]
-    
-    if japanese_fonts:
-        plt.rcParams['font.family'] = japanese_fonts[0]
+
+    # 日本語フォントを設定（優先順位順）
+    font_candidates = [
+        'Noto Sans CJK JP',
+        'Noto Sans JP',
+        'DejaVu Sans',
+        'sans-serif'
+    ]
+
+    # 利用可能なフォントを探す
+    available_fonts = [f.name for f in fm.fontManager.ttflist]
+
+    for font in font_candidates:
+        if font in available_fonts or any(font.lower() in f.lower() for f in available_fonts):
+            plt.rcParams['font.family'] = font
+            print(f"Using font: {font}")
+            break
     else:
-        print("日本語フォントが見つかりませんでした")
-    
+        # フォントが見つからない場合はデフォルト
+        plt.rcParams['font.family'] = 'sans-serif'
+        print("Using default sans-serif font")
+
     plt.rcParams['axes.unicode_minus'] = False
     
     months = range(1, 13)
