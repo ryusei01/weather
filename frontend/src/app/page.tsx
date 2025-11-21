@@ -2,6 +2,7 @@
 
 import axios from "axios";
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import WeatherGraph from "./components/WeatherGraph";
 
 interface WeatherData {
@@ -80,12 +81,35 @@ export default function Home() {
     );
   }
 
+  // 構造化データ（JSON-LD）を生成
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "天気比較 - 今日と過去の気温を比較",
+    "description": `今日（${data.today_date}）の天気は${data.today_weather}、最高気温は${data.today_high_temp}°C。1年前（${data.last_year_date}）は${data.last_year_temp}°C、10年前（${data.ten_years_date}）は${data.ten_years_temp}°Cでした。`,
+    "mainEntity": {
+      "@type": "Dataset",
+      "name": "東京の気温比較データ",
+      "description": "今日と過去の気温データの比較",
+      "temporalCoverage": `${data.forty_years_date}/${data.today_date}`,
+      "spatialCoverage": {
+        "@type": "Place",
+        "name": "東京"
+      }
+    }
+  };
+
   return (
-    <div className="max-w-3xl mx-auto p-6 space-y-12">
-      {/* 広告スペース (上部) */}
-      <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 text-center">
-        <p className="text-xs text-gray-400">広告スペース (728x90)</p>
-      </div>
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
+      <div className="max-w-3xl mx-auto p-6 space-y-12">
+        {/* 広告スペース (上部) */}
+        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 text-center">
+          <p className="text-xs text-gray-400">広告スペース (728x90)</p>
+        </div>
 
       {/* ---------- 今日の天気 ---------- */}
       <WeatherCard
@@ -160,7 +184,58 @@ export default function Home() {
           </p>
         </div>
       )}
-    </div>
+
+      {/* 広告スペース (下部) */}
+      <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 text-center">
+        <p className="text-xs text-gray-400">広告スペース (728x90)</p>
+      </div>
+
+      {/* フッター - 出典とリンクバナー */}
+      <footer className="py-8 border-t border-gray-200">
+        <div className="text-center space-y-4">
+          <p className="text-sm text-gray-600">
+            データ出典：
+            <a
+              href="https://www.jma.go.jp/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-600 hover:underline ml-1"
+            >
+              気象庁ホームページ
+            </a>
+          </p>
+
+          {/* リンクバナースペース */}
+          <div className="flex justify-center gap-4 flex-wrap items-center">
+            <a
+              href="https://www.jma.go.jp/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:opacity-80 transition-opacity"
+            >
+              <Image
+                src="/jma-logo.gif"
+                alt="気象庁"
+                width={150}
+                height={48}
+                className="h-12 w-auto"
+              />
+            </a>
+            <div className="bg-gray-100 px-6 py-3 rounded border border-gray-300">
+              <p className="text-xs text-gray-400">リンクバナー</p>
+            </div>
+            <div className="bg-gray-100 px-6 py-3 rounded border border-gray-300">
+              <p className="text-xs text-gray-400">リンクバナー</p>
+            </div>
+          </div>
+
+          <p className="text-xs text-gray-500 pt-4">
+            © 2025 Weather Comparison
+          </p>
+        </div>
+      </footer>
+      </div>
+    </>
   );
 }
 
