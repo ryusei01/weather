@@ -167,3 +167,31 @@ def weather_graph(request):
 
 def health_check(request):
     return JsonResponse({'status': 'ok'})
+
+@csrf_exempt
+def custom_year_weather(request, years):
+    """
+    指定された年数前の天気データを返す
+    例: /custom-year-weather/2/ → 2年前のデータ
+    """
+    try:
+        years = int(years)
+        if years < 0 or years > 100:
+            return JsonResponse({'error': '年数は0〜100の範囲で指定してください'}, status=400)
+
+        today = datetime.now()
+        target_date = today.replace(year=today.year - years)
+
+        # 過去のデータを取得
+        past_info = get_past_weather_data(target_date)
+
+        return JsonResponse({
+            'years_ago': years,
+            'date': past_info['date'],
+            'temp': past_info['temp'],
+            'weather': past_info['weather'],
+            'source': past_info['source'],
+            'today_date': today.strftime("%Y-%m-%d"),
+        })
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
