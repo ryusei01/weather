@@ -47,6 +47,29 @@ def weather_data(request):
 
     # 今日の天気
     today_forecast = fetch_today_weather_forecast()
+    display_date = today  # 表示する日付（デフォルトは今日）
+
+    # 今日の天気が取得できない場合、昨日のデータを取得
+    if (today_forecast["weather"] == "取得失敗" or
+        today_forecast["high"] is None or
+        today_forecast["high"] == ""):
+        yesterday = today - timedelta(days=1)
+        yesterday_data = get_past_weather_data(yesterday)
+        if yesterday_data["temp"] and yesterday_data["weather"]:
+            today_forecast = {
+                "weather": yesterday_data["weather"],
+                "high": yesterday_data["temp"],
+                "low": None,
+                "rain": None,
+                "source_url": yesterday_data["source"]
+            }
+            # 昨日のデータを使用していることを示すフラグ
+            today_forecast["is_yesterday"] = True
+            display_date = yesterday  # 表示日付を昨日に変更
+        else:
+            today_forecast["is_yesterday"] = False
+    else:
+        today_forecast["is_yesterday"] = False
 
     # === 過去データ取得 ===
     last_year_info = get_past_weather_data(last_year)
@@ -67,12 +90,13 @@ def weather_data(request):
 
     return JsonResponse({
         # 今日
-        "today_date": today.strftime("%Y-%m-%d"),
+        "today_date": display_date.strftime("%Y-%m-%d"),
         "today_weather": today_forecast["weather"],
         "today_high_temp": today_forecast["high"],
         "today_low_temp": today_forecast["low"],
         "today_rain": today_forecast["rain"],
         "today_source": today_forecast["source_url"],
+        "is_yesterday_data": today_forecast.get("is_yesterday", False),
 
         # 去年
         "last_year_date": last_year_info["date"],

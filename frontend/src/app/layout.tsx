@@ -6,6 +6,7 @@ import KeepAlive from "./components/KeepAlive";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'),
   title: "天気比較 - 今日と過去の気温を比較",
   description: "今日の天気と1年前、10年前、20年前、30年前、40年前の気温・天気を比較できます。東京の過去の気温データを確認して、気候変動を実感しよう。",
   keywords: ["天気", "気温", "過去の気温", "1年前の気温", "10年前の気温", "気温比較", "東京の天気", "気象データ", "気候変動"],

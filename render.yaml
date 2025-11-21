@@ -3,6 +3,8 @@ services:
     name: weather-django
     env: python
     buildCommand: |
+      # 日本語フォントのインストール
+      apt-get update && apt-get install -y fonts-noto-cjk fonts-noto-cjk-extra
       pip install --upgrade pip setuptools wheel
       pip install -r requirements.txt
       # Matplotlibのフォントキャッシュをクリア
