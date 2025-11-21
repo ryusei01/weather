@@ -282,7 +282,9 @@ export default function WeatherClient({ initialData }: WeatherClientProps) {
               {data && (
                 <div className="mt-6 pt-6 border-t border-white/30">
                   <p className="text-sm opacity-80 mb-2">
-                    今日（{data.today_date}）との比較
+                    {`${data.is_yesterday_data ? "今日" : "昨日"}${
+                      data.today_date
+                    }）との比較`}
                   </p>
                   <div className="flex items-center justify-center gap-2">
                     {parseFloat(data.today_high_temp) -
