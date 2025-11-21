@@ -429,7 +429,7 @@ export default function WeatherClient({ initialData }: WeatherClientProps) {
         {/* ---------- 7日間の気温 ---------- */}
         {data.week_data && data.week_data.length > 0 && (
           <div className="p-6 bg-white rounded-xl shadow-lg">
-            <h2 className="text-2xl font-bold mb-4">📅 過去7日間の気温</h2>
+            <h2 className="text-2xl font-bold mb-4">📅 過去7日間の気温 ({data.week_data.length}件)</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {data.week_data.map((day) => (
                 <div

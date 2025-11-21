@@ -36,6 +36,13 @@ interface WeatherData {
 
   similar_weather_data?: [string, string, string];
   highest_temp: number;
+  week_data?: Array<{
+    days_ago: number;
+    date: string;
+    temp: string;
+    weather: string;
+    source: string;
+  }>;
 }
 
 async function getWeatherData(): Promise<WeatherData> {
