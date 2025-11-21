@@ -239,20 +239,23 @@ def generate_temperature_graph(current_year_temps, ten_year_temps, twenty_year_t
     fig = plt.figure(figsize=(12, 6))
     
     # データをプロット
-    if current_year_temps:
-        plt.plot(months, current_year_temps, marker='o', linewidth=2, label="今年", color='#FF6B6B')
-    if ten_year_temps:
-        plt.plot(months, ten_year_temps, marker='s', linewidth=2, label="10年前", color='#4ECDC4')
-    if twenty_year_temps:
-        plt.plot(months, twenty_year_temps, marker='^', linewidth=2, label="20年前", color='#45B7D1')
-    if thirty_year_temps:
-        plt.plot(months, thirty_year_temps, marker='D', linewidth=2, label="30年前", color='#FFA07A')
-    if forty_year_temps:
-        plt.plot(months, forty_year_temps, marker='v', linewidth=2, label="40年前", color='#98D8C8')
+    from datetime import datetime
+    current_year = datetime.now().year
 
-    plt.title("年度別 月平均気温の比較", fontsize=16, fontweight='bold', pad=20)
-    plt.xlabel("月", fontsize=12)
-    plt.ylabel("平均気温 (°C)", fontsize=12)
+    if current_year_temps:
+        plt.plot(months, current_year_temps, marker='o', linewidth=2, label=f"{current_year}", color='#FF6B6B')
+    if ten_year_temps:
+        plt.plot(months, ten_year_temps, marker='s', linewidth=2, label=f"{current_year-10}", color='#4ECDC4')
+    if twenty_year_temps:
+        plt.plot(months, twenty_year_temps, marker='^', linewidth=2, label=f"{current_year-20}", color='#45B7D1')
+    if thirty_year_temps:
+        plt.plot(months, thirty_year_temps, marker='D', linewidth=2, label=f"{current_year-30}", color='#FFA07A')
+    if forty_year_temps:
+        plt.plot(months, forty_year_temps, marker='v', linewidth=2, label=f"{current_year-40}", color='#98D8C8')
+
+    plt.title("Monthly Average Temperature Comparison by Year", fontsize=16, fontweight='bold', pad=20)
+    plt.xlabel("Month", fontsize=12)
+    plt.ylabel("Temperature (°C)", fontsize=12)
     plt.legend(loc='best', fontsize=11, framealpha=0.9)
     plt.grid(True, alpha=0.3, linestyle='--')
     plt.xticks(months)
