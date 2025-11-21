@@ -62,7 +62,7 @@ MIDDLEWARE = [
 # CORS設定
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
-    "https://your-app.vercel.app",  # Vercelのドメイン
+    "https://weather-ten-gamma-42.vercel.app",
 ]
 
 ROOT_URLCONF = 'weather_project.urls'
