@@ -53,11 +53,40 @@ export default function Home() {
       .catch((err) => setError(err.message));
   }, [API_URL]);
 
-  if (error) return <p>Error: {error}</p>;
-  if (!data) return <p>Loading...</p>;
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
+        <div className="bg-white p-8 rounded-2xl shadow-xl">
+          <p className="text-red-600 text-lg">エラー: {error}</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!data) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600 mb-4"></div>
+          <p className="text-xl font-semibold text-gray-700">天気情報を読み込み中...</p>
+          <p className="text-sm text-gray-500 mt-2">少々お待ちください</p>
+
+          {/* 広告スペース (将来的に使用) */}
+          <div className="mt-8 p-4 bg-gray-100 rounded-lg border-2 border-dashed border-gray-300">
+            <p className="text-xs text-gray-400">広告スペース</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-3xl mx-auto p-6 space-y-12">
+      {/* 広告スペース (上部) */}
+      <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 text-center">
+        <p className="text-xs text-gray-400">広告スペース (728x90)</p>
+      </div>
+
       {/* ---------- 今日の天気 ---------- */}
       <WeatherCard
         title={`今日 (${data.today_date})`}
@@ -114,6 +143,11 @@ export default function Home() {
       </div>
 
       <WeatherGraph />
+
+      {/* 広告スペース (中間) */}
+      <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 text-center">
+        <p className="text-xs text-gray-400">広告スペース (300x250)</p>
+      </div>
 
       {/* ---------- 類似天気の日 ---------- */}
       {data.similar_weather_data && (
