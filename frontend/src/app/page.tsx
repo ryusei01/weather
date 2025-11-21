@@ -44,10 +44,7 @@ interface WeatherData {
 export default function Home() {
   const [data, setData] = useState<WeatherData | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://weather-dzvo.onrender.com";
-
-  console.log("API_URL:", API_URL);
-  console.log("process.env.NEXT_PUBLIC_API_URL:", process.env.NEXT_PUBLIC_API_URL);
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
   useEffect(() => {
     axios
@@ -173,7 +170,7 @@ function WeatherCard({
         rel="noopener noreferrer"
         className="text-blue-600 underline mt-3 inline-block"
       >
-        引用元（気象庁データ）
+        出典：気象庁ホームページ
       </a>
     </div>
   );
