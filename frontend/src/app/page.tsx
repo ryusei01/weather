@@ -186,17 +186,19 @@ export default function Home() {
 
         {/* 任意の年数を選択 */}
         <div className="p-6 bg-white rounded-xl shadow-lg">
-          <h2 className="text-2xl font-bold mb-4">何年前の気温を見る？</h2>
-          <div className="flex items-center gap-4">
-            <input
-              type="number"
-              min="1"
-              max="100"
-              value={customYears}
-              onChange={(e) => setCustomYears(parseInt(e.target.value) || 1)}
-              className="px-4 py-2 border-2 border-blue-300 rounded-lg text-xl w-24 focus:outline-none focus:border-blue-500"
-            />
-            <span className="text-xl font-semibold">年前</span>
+          <h2 className="text-2xl font-bold mb-4">🔍 何年前の気温を見る？</h2>
+          <div className="flex items-center gap-4 flex-wrap">
+            <div className="flex items-center gap-2">
+              <input
+                type="number"
+                min="1"
+                max="100"
+                value={customYears}
+                onChange={(e) => setCustomYears(parseInt(e.target.value) || 1)}
+                className="px-4 py-2 border-2 border-blue-300 rounded-lg text-xl w-24 focus:outline-none focus:border-blue-500"
+              />
+              <span className="text-xl font-semibold">年前</span>
+            </div>
             <button
               onClick={async () => {
                 try {
@@ -206,29 +208,69 @@ export default function Home() {
                   console.error('データ取得エラー:', err);
                 }
               }}
-              className="px-6 py-2 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition-colors"
+              className="flex items-center gap-2 px-6 py-2 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition-colors shadow-md hover:shadow-lg"
             >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd" />
+              </svg>
               検索
             </button>
           </div>
+          <p className="text-sm text-gray-500 mt-3">💡 1〜100年前の気温を検索できます</p>
         </div>
 
         {/* カスタム年数の結果表示 */}
         {customYearData && (
-          <div className="p-8 bg-gradient-to-r from-green-500 to-teal-600 rounded-2xl shadow-2xl text-white">
-            <div className="text-center">
-              <h1 className="text-4xl font-bold mb-4">{customYearData.years_ago}年前の気温</h1>
-              <p className="text-6xl font-extrabold mb-2">{customYearData.temp}°C</p>
-              <p className="text-2xl mb-4">{customYearData.weather}</p>
-              <p className="text-lg opacity-90">{customYearData.date}</p>
+          <div className="p-8 bg-gradient-to-r from-green-500 to-teal-600 rounded-2xl shadow-2xl text-white relative overflow-hidden">
+            {/* 背景の装飾 */}
+            <div className="absolute top-0 right-0 opacity-10">
+              <svg className="w-64 h-64" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/>
+              </svg>
+            </div>
+
+            <div className="text-center relative z-10">
+              <div className="flex items-center justify-center gap-3 mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
+                </svg>
+                <h1 className="text-4xl font-bold">{customYearData.years_ago}年前の気温</h1>
+              </div>
+
+              <div className="flex items-center justify-center gap-2 mb-2">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
+                </svg>
+                <p className="text-6xl font-extrabold">{customYearData.temp}°C</p>
+              </div>
+
+              <div className="flex items-center justify-center gap-2 mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" viewBox="0 0 20 20" fill="currentColor">
+                  <path d="M5.5 16a3.5 3.5 0 01-.369-6.98 4 4 0 117.753-1.977A4.5 4.5 0 1113.5 16h-8z" />
+                </svg>
+                <p className="text-2xl">{customYearData.weather}</p>
+              </div>
+
+              <p className="text-lg opacity-90 mb-2">📅 {customYearData.date}</p>
 
               {data && (
                 <div className="mt-6 pt-6 border-t border-white/30">
-                  <p className="text-sm opacity-80">今日（{data.today_date}）との比較</p>
-                  <p className="text-3xl font-bold mt-2">
-                    {(parseFloat(data.today_high_temp) - parseFloat(customYearData.temp)) > 0 ? "+" : ""}
-                    {(parseFloat(data.today_high_temp) - parseFloat(customYearData.temp)).toFixed(1)}°C
-                  </p>
+                  <p className="text-sm opacity-80 mb-2">今日（{data.today_date}）との比較</p>
+                  <div className="flex items-center justify-center gap-2">
+                    {(parseFloat(data.today_high_temp) - parseFloat(customYearData.temp)) > 0 ? (
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-red-200" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M5.293 9.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 7.414V15a1 1 0 11-2 0V7.414L6.707 9.707a1 1 0 01-1.414 0z" clipRule="evenodd" />
+                      </svg>
+                    ) : (
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-blue-200" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M14.707 10.293a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 111.414-1.414L9 12.586V5a1 1 0 012 0v7.586l2.293-2.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                    )}
+                    <p className="text-3xl font-bold">
+                      {(parseFloat(data.today_high_temp) - parseFloat(customYearData.temp)) > 0 ? "+" : ""}
+                      {(parseFloat(data.today_high_temp) - parseFloat(customYearData.temp)).toFixed(1)}°C
+                    </p>
+                  </div>
                 </div>
               )}
             </div>
