@@ -211,27 +211,32 @@ def generate_temperature_graph(current_year_temps, ten_year_temps, twenty_year_t
     Base64 PNG として返却する
     """
     import matplotlib.font_manager as fm
+    import platform
 
-    # 日本語フォントを設定（優先順位順）
-    font_candidates = [
-        'Noto Sans CJK JP',
-        'Noto Sans JP',
-        'DejaVu Sans',
-        'sans-serif'
-    ]
+    # 日本語フォントを設定（OS別）
+    system = platform.system()
+
+    if system == 'Windows':
+        # Windows環境の日本語フォント
+        font_candidates = ['MS Gothic', 'Yu Gothic', 'Meiryo', 'BIZ UDGothic']
+    else:
+        # Linux/Mac環境の日本語フォント
+        font_candidates = ['Noto Sans CJK JP', 'Noto Sans JP', 'IPAGothic', 'Takao']
 
     # 利用可能なフォントを探す
-    available_fonts = [f.name for f in fm.fontManager.ttflist]
+    available_fonts = {f.name for f in fm.fontManager.ttflist}
 
+    font_found = False
     for font in font_candidates:
-        if font in available_fonts or any(font.lower() in f.lower() for f in available_fonts):
+        if font in available_fonts:
             plt.rcParams['font.family'] = font
-            print(f"Using font: {font}")
+            print(f"Using font: {font} (System: {system})")
+            font_found = True
             break
-    else:
-        # フォントが見つからない場合はデフォルト
-        plt.rcParams['font.family'] = 'sans-serif'
-        print("Using default sans-serif font")
+
+    if not font_found:
+        print(f"Japanese font not found on {system}, using DejaVu Sans")
+        plt.rcParams['font.family'] = 'DejaVu Sans'
 
     plt.rcParams['axes.unicode_minus'] = False
     
@@ -242,20 +247,44 @@ def generate_temperature_graph(current_year_temps, ten_year_temps, twenty_year_t
     from datetime import datetime
     current_year = datetime.now().year
 
-    if current_year_temps:
-        plt.plot(months, current_year_temps, marker='o', linewidth=2, label=f"{current_year}", color='#FF6B6B')
-    if ten_year_temps:
-        plt.plot(months, ten_year_temps, marker='s', linewidth=2, label=f"{current_year-10}", color='#4ECDC4')
-    if twenty_year_temps:
-        plt.plot(months, twenty_year_temps, marker='^', linewidth=2, label=f"{current_year-20}", color='#45B7D1')
-    if thirty_year_temps:
-        plt.plot(months, thirty_year_temps, marker='D', linewidth=2, label=f"{current_year-30}", color='#FFA07A')
-    if forty_year_temps:
-        plt.plot(months, forty_year_temps, marker='v', linewidth=2, label=f"{current_year-40}", color='#98D8C8')
+    # フォントが見つかっている場合は日本語、見つかってない場合は英語
+    if font_found:
+        title = "年度別 月平均気温の比較"
+        xlabel = "月"
+        ylabel = "平均気温 (°C)"
+        year_labels = {
+            'current': f"{current_year}年",
+            'ten': f"{current_year-10}年",
+            'twenty': f"{current_year-20}年",
+            'thirty': f"{current_year-30}年",
+            'forty': f"{current_year-40}年"
+        }
+    else:
+        title = "Monthly Average Temperature Comparison"
+        xlabel = "Month"
+        ylabel = "Temperature (°C)"
+        year_labels = {
+            'current': str(current_year),
+            'ten': str(current_year-10),
+            'twenty': str(current_year-20),
+            'thirty': str(current_year-30),
+            'forty': str(current_year-40)
+        }
 
-    plt.title("Monthly Average Temperature Comparison by Year", fontsize=16, fontweight='bold', pad=20)
-    plt.xlabel("Month", fontsize=12)
-    plt.ylabel("Temperature (°C)", fontsize=12)
+    if current_year_temps:
+        plt.plot(months, current_year_temps, marker='o', linewidth=2, label=year_labels['current'], color='#FF6B6B')
+    if ten_year_temps:
+        plt.plot(months, ten_year_temps, marker='s', linewidth=2, label=year_labels['ten'], color='#4ECDC4')
+    if twenty_year_temps:
+        plt.plot(months, twenty_year_temps, marker='^', linewidth=2, label=year_labels['twenty'], color='#45B7D1')
+    if thirty_year_temps:
+        plt.plot(months, thirty_year_temps, marker='D', linewidth=2, label=year_labels['thirty'], color='#FFA07A')
+    if forty_year_temps:
+        plt.plot(months, forty_year_temps, marker='v', linewidth=2, label=year_labels['forty'], color='#98D8C8')
+
+    plt.title(title, fontsize=16, fontweight='bold', pad=20)
+    plt.xlabel(xlabel, fontsize=12)
+    plt.ylabel(ylabel, fontsize=12)
     plt.legend(loc='best', fontsize=11, framealpha=0.9)
     plt.grid(True, alpha=0.3, linestyle='--')
     plt.xticks(months)
