@@ -4,10 +4,14 @@ services:
     env: python
     buildCommand: |
       # 日本語フォントのインストール
-      apt-get update && apt-get install -y fonts-noto-cjk fonts-noto-cjk-extra
+      apt-get update && apt-get install -y fonts-noto-cjk fonts-noto-cjk-extra fontconfig
       pip install --upgrade pip setuptools wheel
       pip install -r requirements.txt
       # Matplotlibのフォントキャッシュをクリア
       rm -rf ~/.cache/matplotlib
-      pip install japanize_matplotlib
+      # フォントキャッシュを再構築
+      fc-cache -fv
+      # インストールされたフォントを確認
+      echo "=== Installed Japanese fonts ==="
+      fc-list :lang=ja family | sort | uniq
     startCommand: gunicorn weather_project.wsgi:application --bind 0.0.0.0:$PORT --timeout 120 --workers 2

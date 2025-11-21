@@ -212,35 +212,61 @@ def generate_temperature_graph(current_year_temps, ten_year_temps, twenty_year_t
     """
     import matplotlib.font_manager as fm
     import platform
+    import os
+    import glob
 
     # 日本語フォントを設定（OS別）
     system = platform.system()
+    font_found = False
 
     if system == 'Windows':
         # Windows環境の日本語フォント
         font_candidates = ['MS Gothic', 'Yu Gothic', 'Meiryo', 'BIZ UDGothic']
+        available_fonts = {f.name for f in fm.fontManager.ttflist}
+
+        for font in font_candidates:
+            if font in available_fonts:
+                plt.rcParams['font.family'] = font
+                logger.info(f"Using font: {font} (System: {system})")
+                font_found = True
+                break
     else:
-        # Linux/Mac環境の日本語フォント
-        font_candidates = ['Noto Sans CJK JP', 'Noto Sans JP', 'IPAGothic', 'Takao', 'DejaVu Sans']
+        # Linux/Mac環境: フォントファイルパスを直接指定
+        font_paths = [
+            '/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc',
+            '/usr/share/fonts/truetype/noto/NotoSansCJK-Regular.ttc',
+            '/usr/share/fonts/opentype/noto/NotoSansCJK-Medium.ttc',
+            '/System/Library/Fonts/ヒラギノ角ゴシック W3.ttc',
+            '/usr/share/fonts/truetype/takao-gothic/TakaoPGothic.ttf',
+        ]
 
-    # 利用可能なフォントを探す
-    available_fonts = {f.name for f in fm.fontManager.ttflist}
+        # 実際に存在するフォントファイルを探す
+        for font_path in font_paths:
+            if os.path.exists(font_path):
+                try:
+                    font_prop = fm.FontProperties(fname=font_path)
+                    plt.rcParams['font.family'] = font_prop.get_name()
+                    logger.info(f"Using font file: {font_path} -> {font_prop.get_name()}")
+                    font_found = True
+                    break
+                except Exception as e:
+                    logger.warning(f"Failed to load font {font_path}: {e}")
 
-    # デバッグ: 利用可能なフォントをログ出力
-    logger.info(f"System: {system}")
-    logger.info(f"Available fonts containing 'Noto' or 'CJK': {[f for f in available_fonts if 'Noto' in f or 'CJK' in f or 'IPA' in f]}")
-
-    font_found = False
-    for font in font_candidates:
-        if font in available_fonts:
-            plt.rcParams['font.family'] = font
-            logger.info(f"Using font: {font} (System: {system})")
-            font_found = True
-            break
+        # フォントファイルが見つからない場合、glob検索
+        if not font_found:
+            noto_fonts = glob.glob('/usr/share/fonts/**/Noto*CJK*.ttc', recursive=True)
+            logger.info(f"Found Noto CJK fonts via glob: {noto_fonts}")
+            if noto_fonts:
+                try:
+                    font_prop = fm.FontProperties(fname=noto_fonts[0])
+                    plt.rcParams['font.family'] = font_prop.get_name()
+                    logger.info(f"Using font file (glob): {noto_fonts[0]} -> {font_prop.get_name()}")
+                    font_found = True
+                except Exception as e:
+                    logger.warning(f"Failed to load font {noto_fonts[0]}: {e}")
 
     if not font_found:
-        logger.warning(f"Japanese font not found on {system}. Tried: {font_candidates}")
-        logger.warning(f"Available fonts sample: {list(available_fonts)[:10]}")
+        logger.warning(f"Japanese font not found on {system}")
         plt.rcParams['font.family'] = 'DejaVu Sans'
 
     plt.rcParams['axes.unicode_minus'] = False
