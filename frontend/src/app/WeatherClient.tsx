@@ -4,6 +4,7 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import WeatherGraph from "./components/WeatherGraph";
+import AdBanner from "./components/AdBanner";
 
 interface WeatherData {
   today_date: string;
@@ -400,6 +401,11 @@ export default function WeatherClient({ initialData }: WeatherClientProps) {
           source={data.today_source}
         />
 
+        {/* 広告1 */}
+        <div className="my-8">
+          <AdBanner dataAdSlot="1234567890" />
+        </div>
+
         {/* ---------- 去年 ---------- */}
         <WeatherCard
           title={`1年前 (${data.last_year_date})`}
@@ -575,6 +581,11 @@ export default function WeatherClient({ initialData }: WeatherClientProps) {
           ) : null}
         </div>
 
+        {/* 広告3 */}
+        <div className="my-8">
+          <AdBanner dataAdSlot="1111111111" />
+        </div>
+
         {/* ---------- AI気温予測 ---------- */}
         <div className="p-6 bg-gradient-to-r from-purple-600 to-pink-600 rounded-xl shadow-lg text-white">
           <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
@@ -735,9 +746,9 @@ export default function WeatherClient({ initialData }: WeatherClientProps) {
           </div>
         )}
 
-        {/* 広告スペース (下部) */}
-        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 text-center">
-          <p className="text-xs text-gray-400">広告スペース (728x90)</p>
+        {/* 広告2 */}
+        <div className="my-8">
+          <AdBanner dataAdSlot="9876543210" />
         </div>
 
         {/* フッター - 出典とリンクバナー */}
