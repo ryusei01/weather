@@ -4,7 +4,11 @@ import Script from "next/script";
 import "./globals.css";
 import KeepAlive from "./components/KeepAlive";
 
-const inter = Inter({ subsets: ["latin"] });
+const inter = Inter({
+  subsets: ["latin"],
+  display: 'swap',
+  preload: true,
+});
 
 export const metadata: Metadata = {
   metadataBase: new URL(
