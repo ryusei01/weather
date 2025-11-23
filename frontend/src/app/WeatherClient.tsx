@@ -7,12 +7,16 @@ import dynamic from "next/dynamic";
 
 // 動的インポートでコンポーネントを遅延読み込み
 const WeatherGraph = dynamic(() => import("./components/WeatherGraph"), {
-  loading: () => <div className="p-6 bg-white rounded-xl shadow-lg animate-pulse h-64"></div>,
+  loading: () => (
+    <div className="p-6 bg-white rounded-xl shadow-lg animate-pulse h-64"></div>
+  ),
   ssr: true,
 });
 
 const AdBanner = dynamic(() => import("./components/AdBanner"), {
-  loading: () => <div className="my-8 h-32 bg-gray-100 rounded-lg animate-pulse"></div>,
+  loading: () => (
+    <div className="my-8 h-32 bg-gray-100 rounded-lg animate-pulse"></div>
+  ),
   ssr: false,
 });
 
@@ -410,11 +414,6 @@ export default function WeatherClient({ initialData }: WeatherClientProps) {
           weather={data.today_weather}
           source={data.today_source}
         />
-
-        {/* 広告1 */}
-        <div className="my-8">
-          <AdBanner dataAdSlot="1234567890" />
-        </div>
 
         {/* ---------- 去年 ---------- */}
         <WeatherCard
