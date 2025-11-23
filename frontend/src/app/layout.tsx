@@ -91,6 +91,33 @@ export default function RootLayout({
           crossOrigin="anonymous"
           strategy="beforeInteractive"
         />
+        {/* JSON-LD Structured Data */}
+        <Script
+          id="json-ld"
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "WebApplication",
+              name: "天気比較",
+              description:
+                "今日の天気と1年前、10年前、20年前、30年前、40年前の気温・天気を比較できます。東京の過去の気温データを確認して、気候変動を実感しよう。",
+              url: "https://weather-ten-gamma-42.vercel.app/",
+              applicationCategory: "UtilityApplication",
+              operatingSystem: "Any",
+              offers: {
+                "@type": "Offer",
+                price: "0",
+                priceCurrency: "JPY",
+              },
+              inLanguage: "ja",
+              author: {
+                "@type": "Organization",
+                name: "天気比較",
+              },
+            }),
+          }}
+        />
       </head>
       <body className={inter.className}>
         <KeepAlive />
