@@ -6,7 +6,7 @@ import KeepAlive from "./components/KeepAlive";
 
 const inter = Inter({
   subsets: ["latin"],
-  display: 'swap',
+  display: "swap",
   preload: true,
 });
 
@@ -14,7 +14,7 @@ export const metadata: Metadata = {
   metadataBase: new URL(
     process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"
   ),
-  title: "天気比較 - 今日と過去の気温を比較",
+  title: "1年前の気温 - 今日と過去の気温を比較",
   description:
     "今日の天気と1年前、10年前、20年前、30年前、40年前の気温・天気を比較できます。東京の過去の気温データを確認して、気候変動を実感しよう。",
   keywords: [
@@ -36,7 +36,7 @@ export const metadata: Metadata = {
     apple: "/apple-icon.png",
   },
   openGraph: {
-    title: "天気比較 - 今日と過去の気温を比較",
+    title: "1年前の気温 - 今日と過去の気温を比較",
     description:
       "今日の天気と過去の気温を簡単に比較。1年前から40年前までの気温データを確認できます。",
     type: "website",
@@ -52,7 +52,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "天気比較 - 今日と過去の気温を比較",
+    title: "1年前の気温 - 今日と過去の気温を比較",
     description:
       "今日の天気と過去の気温を簡単に比較。1年前から40年前までの気温データを確認できます。",
     images: ["/og-image.png"],
