@@ -81,20 +81,21 @@ export default function RootLayout({
   return (
     <html lang="ja">
       <head>
-        {/* Google Analytics */}
+        {/* Google tag (gtag.js) */}
         <Script
-          strategy="beforeInteractive"
-          src="https://www.googletagmanager.com/gtag/js?id=G-XYTY2SKLR4"
+          async
+          src="https://www.googletagmanager.com/gtag/js?id=G-ZEEQN53K19"
+          strategy="afterInteractive"
         />
         <Script
           id="google-analytics"
-          strategy="beforeInteractive"
+          strategy="afterInteractive"
           dangerouslySetInnerHTML={{
             __html: `
               window.dataLayer = window.dataLayer || [];
               function gtag(){dataLayer.push(arguments);}
               gtag('js', new Date());
-              gtag('config', 'G-XYTY2SKLR4');
+              gtag('config', 'G-ZEEQN53K19');
             `,
           }}
         />
@@ -133,9 +134,13 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className={inter.className}>
+      <body
+        className={`${inter.className} antialiased min-h-screen bg-gradient-to-br from-blue-50 via-white to-sky-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900`}
+      >
         <KeepAlive />
-        {children}
+        <div className="min-h-screen flex flex-col">
+          <main className="flex-1">{children}</main>
+        </div>
       </body>
     </html>
   );
